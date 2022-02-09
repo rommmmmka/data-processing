@@ -17,24 +17,20 @@ file = pd.read_csv("data.csv")
 file_limits = pd.read_csv("limits.csv")
 train, test = train_test_split(file, test_size=0.2, random_state=42)
 dict_columns = {}
-dict_labels = {}
 for i, val in enumerate(file.columns.tolist()):
     if i == 0:
         continue
     data = val.split("_")
     if dict_columns.get(data[0]) is None:
         dict_columns[data[0]] = [val]
-        dict_labels[data[0]] = [int(data[1])]
     else:
         dict_columns.get(data[0]).append(val)
-        dict_labels.get(data[0]).append(int(data[1]))
 print(dict_columns)
-print(dict_labels)
 
 for u in dict_columns:
     print(u)
     columns = dict_columns[u]
-    time_labels = dict_labels[u]
+    time_labels = [int(i.split("_")[1]) for i in columns]
     time_check = max(time_labels)
     limits = file_limits[file_limits["name"] == u]
     bottom_limit = float(limits["bottom_limit"])
@@ -77,8 +73,6 @@ for u in dict_columns:
     f.write(str(mean))
     f.write("\nСреднеквадратические отклонения:\n")
     f.write(str(std))
-
-
 
     mean = np.array(mean)
     std = np.array(std)
