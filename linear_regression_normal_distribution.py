@@ -51,6 +51,30 @@ for u in dict_columns:
     plt.close()
 
     plt.figure(figsize=(11, 7))
+    for i in range(train.shape[0]):
+        data = np.array(train[columns].iloc[i])
+        plt.title('Train data')
+        plt.xlabel('time')
+        plt.ylabel(u)
+        plt.plot(time_labels, data, color='steelblue', linewidth=1)
+    plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
+    plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
+    plt.savefig(f"result/{u}/1_1.jpg")
+    plt.close()
+
+    plt.figure(figsize=(11, 7))
+    for i in range(test.shape[0]):
+        data = np.array(test[columns].iloc[i])
+        plt.title('Test data')
+        plt.xlabel('time')
+        plt.ylabel(u)
+        plt.plot(time_labels, data, color='steelblue', linewidth=1)
+    plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
+    plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
+    plt.savefig(f"result/{u}/1_2.jpg")
+    plt.close()
+
+    plt.figure(figsize=(11, 7))
     for i in range(file.shape[0]):
         data = np.array(file[columns].iloc[i])
         plt.title('')
@@ -116,6 +140,7 @@ for u in dict_columns:
         if i < bottom_limit or i > top_limit:
             working -= 1
     test_working_experiment = working / test.shape[0]
+    print(working, test.shape[0])
 
     test_working_predict = sps.norm(loc=mean_test, scale=std_test).cdf(top_limit) - sps.norm(loc=mean_test,
                                                                                               scale=std_test).cdf(bottom_limit)
