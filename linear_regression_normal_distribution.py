@@ -132,28 +132,41 @@ for u in dict_columns:
 
     mean_test_time0 = test[columns[0]].mean()
     std_test_time0 = test[columns[0]].std()
-    mean_test = mean_test_time0 + mean_coef * time_check
-    std_test = std_test_time0 + std_coef * time_check
 
-    working = test.shape[0]
-    for i in test[columns[6]]:
-        if i < bottom_limit or i > top_limit:
-            working -= 1
-    test_working_experiment = working / test.shape[0]
-    print(working, test.shape[0])
+    mean_test = []
+    std_test = []
+    for i in time_labels:
+        mean_test.append(mean_test_time0 + mean_coef * i)
+        std_test.append(std_test_time0 + std_coef * i)
 
-    test_working_predict = sps.norm(loc=mean_test, scale=std_test).cdf(top_limit) - sps.norm(loc=mean_test,
-                                                                                              scale=std_test).cdf(bottom_limit)
-    test_error = abs((test_working_predict - test_working_experiment) / test_working_experiment)
+    test_working_predict = []
+    for i in mean_test:
+        for j in std_test:
+            test_working_predict.append(
+                sps.norm(loc=i, scale=j).cdf(top_limit) - sps.norm(loc=i, scale=j).cdf(bottom_limit))
 
-    f.write(f"\n\nПроцент рабочих устройств\nРеальное значение: {test_working_experiment}")
-    f.write(f"\nПрогноз:{test_working_predict}")
-    f.write(f"\nПамылка:{test_error}")
+    test_working_experiment = []
+    for i in columns:
+        working = 0
+        for j in test[i]:
+            if j > bottom_limit and j < top_limit:
+                working += 1
+        test_working_experiment.append(working / test.shape[0])
+
+    test_error = 0
+    for p, e in zip(test_working_predict, test_working_experiment):
+        test_error += pow((p - e) / e, 2)
+    test_error = np.sqrt(test_error / len(test_working_predict))
+
+    f.write(f"\n\nПроцент рабочих устройств\nВремя: Прогноз (реальное значение)\n")
+    for t, p, e in zip(time_labels, test_working_predict, test_working_experiment):
+        f.write(f"{t}: {p} ({e})\n")
+    f.write(f"Ошибка: {test_error}")
 
     plt.figure(figsize=(11, 7))
     sns.histplot(test[columns[6]], bins=10)
-    x = np.linspace(mean_test - 4 * std_test, mean_test + 5 * std_test, 100)
-    plt.plot(x, sps.norm(loc=mean_test, scale=std_test).pdf(x), color='darkorange')
+    x = np.linspace(mean_test[len(mean_test) - 1] - 4 * std_test[len(std_test) - 1], mean_test[len(mean_test) - 1] + 5 * std_test[len(std_test) - 1], 100)
+    plt.plot(x, sps.norm(loc=mean_test[len(mean_test) - 1], scale=std_test[len(std_test) - 1]).pdf(x), color='darkorange')
     plt.axvline(bottom_limit, 0, 1, color='k')
     plt.axvline(top_limit, 0, 1, color='k')
     plt.savefig(f"result/{u}/5.jpg")
