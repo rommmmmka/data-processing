@@ -132,7 +132,6 @@ for u in dict_columns:
 
     mean_test_time0 = test[columns[0]].mean()
     std_test_time0 = test[columns[0]].std()
-
     mean_test = []
     std_test = []
     for i in time_labels:
@@ -158,7 +157,7 @@ for u in dict_columns:
         test_error += pow((p - e) / e, 2)
     test_error = np.sqrt(test_error / len(test_working_predict))
 
-    f.write(f"\n\nПроцент рабочих устройств\nВремя: Прогноз (реальное значение)\n")
+    f.write(f"\n\nПроцент рабочих устройств\nВремя: Прогноз (Реальное значение)\n")
     for t, p, e in zip(time_labels, test_working_predict, test_working_experiment):
         f.write(f"{t}: {p} ({e})\n")
     f.write(f"Ошибка: {test_error}")
