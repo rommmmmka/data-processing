@@ -154,7 +154,6 @@ for u in dict_columns:
 
     test_error = 0
     for p, e in zip(test_working_predict, test_working_experiment):
-        print(p, e)
         test_error += pow((p - e) / e, 2)
     test_error = np.sqrt(test_error / len(test_working_predict))
 
