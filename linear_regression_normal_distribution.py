@@ -139,10 +139,9 @@ for u in dict_columns:
         std_test.append(std_test_time0 + std_coef * i)
 
     test_working_predict = []
-    for i in mean_test:
-        for j in std_test:
-            test_working_predict.append(
-                sps.norm(loc=i, scale=j).cdf(top_limit) - sps.norm(loc=i, scale=j).cdf(bottom_limit))
+    for i, j in zip(mean_test, std_test):
+        test_working_predict.append(
+            sps.norm(loc=i, scale=j).cdf(top_limit) - sps.norm(loc=i, scale=j).cdf(bottom_limit))
 
     test_working_experiment = []
     for i in columns:

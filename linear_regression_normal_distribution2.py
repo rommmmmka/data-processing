@@ -69,8 +69,7 @@ for u in dict_columns:
             std_test.append(std_test_time0 + std_coef * i)
 
         test_working_predict = []
-        for i in mean_test:
-            for j in std_test:
+        for i, j in zip(mean_test, std_test):
                 test_working_predict.append(
                     sps.norm(loc=i, scale=j).cdf(top_limit) - sps.norm(loc=i, scale=j).cdf(bottom_limit))
 
@@ -86,6 +85,8 @@ for u in dict_columns:
         for p, e in zip(test_working_predict, test_working_experiment):
             test_error += pow((p - e) / e, 2)
         test_error = np.sqrt(test_error / len(test_working_predict))
+
+        # test_error = abs((test_working_predict[6] - test_working_experiment[6]) / test_working_experiment[6])
 
         f.write(f"\n\nОбучающая выборка - {100 - int(dist * 100)}%, тестовая выборка - {int(dist * 100)}%\n")
         for t, p, e in zip(time_labels, test_working_predict, test_working_experiment):
