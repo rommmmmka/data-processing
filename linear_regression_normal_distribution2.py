@@ -10,9 +10,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 
 sns.set_style("darkgrid")
-if os.path.isdir("result2"):
-    shutil.rmtree("result2")
-os.makedirs(f"result2/")
+if os.path.isdir("normal_distribution/result2"):
+    shutil.rmtree("normal_distribution/result2")
+os.makedirs(f"normal_distribution/result2/")
 
 file = pd.read_csv("data.csv")
 file_limits = pd.read_csv("limits.csv")
@@ -37,7 +37,7 @@ for u in dict_columns:
         limits = file_limits[file_limits["name"] == u]
         bottom_limit = float(limits["bottom_limit"])
         top_limit = float(limits["top_limit"])
-        f = open(f"result2/{u}.txt", "a", encoding="utf-8")
+        f = open(f"normal_distribution/result2/{u}.txt", "a", encoding="utf-8")
 
         mean = []
         std = []

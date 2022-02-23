@@ -10,8 +10,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 
 sns.set_style("darkgrid")
-if os.path.isdir("result"):
-    shutil.rmtree("result")
+if os.path.isdir("normal_distribution/result"):
+    shutil.rmtree("normal_distribution/result")
 
 file = pd.read_csv("data.csv")
 file_limits = pd.read_csv("limits.csv")
@@ -35,8 +35,8 @@ for u in dict_columns:
     limits = file_limits[file_limits["name"] == u]
     bottom_limit = float(limits["bottom_limit"])
     top_limit = float(limits["top_limit"])
-    os.makedirs(f"result/{u}")
-    f = open(f"result/{u}/results.txt", "w", encoding="utf-8")
+    os.makedirs(f"normal_distribution/result/{u}")
+    f = open(f"normal_distribution/result/{u}/results.txt", "w", encoding="utf-8")
 
     plt.figure(figsize=(11, 7))
     for i in range(file.shape[0]):
@@ -47,7 +47,7 @@ for u in dict_columns:
         plt.plot(time_labels, data, color='steelblue', linewidth=1)
     plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
     plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
-    plt.savefig(f"result/{u}/1.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/1.jpg")
     plt.close()
 
     plt.figure(figsize=(11, 7))
@@ -59,7 +59,7 @@ for u in dict_columns:
         plt.plot(time_labels, data, color='steelblue', linewidth=1)
     plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
     plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
-    plt.savefig(f"result/{u}/1_1.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/2.jpg")
     plt.close()
 
     plt.figure(figsize=(11, 7))
@@ -71,7 +71,7 @@ for u in dict_columns:
         plt.plot(time_labels, data, color='steelblue', linewidth=1)
     plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
     plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
-    plt.savefig(f"result/{u}/1_2.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/3.jpg")
     plt.close()
 
     plt.figure(figsize=(11, 7))
@@ -83,7 +83,7 @@ for u in dict_columns:
         plt.scatter(time_labels, data, color='steelblue', marker=".")
     plt.axhline(y=bottom_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
     plt.axhline(y=top_limit, xmin=0, xmax=1, color='k', linewidth=1.5)
-    plt.savefig(f"result/{u}/2.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/4.jpg")
     plt.close()
 
     mean = []
@@ -113,7 +113,7 @@ for u in dict_columns:
     plt.plot(time_labels, mean, label="actual", marker="o")
     plt.plot(time_labels, predict_values, label="prediction", marker="o")
     plt.legend()
-    plt.savefig(f"result/{u}/3.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/5.jpg")
     plt.close()
 
     model_std = LinearRegression()
@@ -127,7 +127,7 @@ for u in dict_columns:
     plt.plot(time_labels, std, label="actual", marker="o")
     plt.plot(time_labels, predict_values, label="prediction", marker="o")
     plt.legend()
-    plt.savefig(f"result/{u}/4.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/6.jpg")
     plt.close()
 
     mean_test_time0 = test[columns[0]].mean()
@@ -167,7 +167,7 @@ for u in dict_columns:
     plt.plot(x, sps.norm(loc=mean_test[len(mean_test) - 1], scale=std_test[len(std_test) - 1]).pdf(x), color='darkorange')
     plt.axvline(bottom_limit, 0, 1, color='k')
     plt.axvline(top_limit, 0, 1, color='k')
-    plt.savefig(f"result/{u}/5.jpg")
+    plt.savefig(f"normal_distribution/result/{u}/7.jpg")
     plt.close()
 
     f.close()
