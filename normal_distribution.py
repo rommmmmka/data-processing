@@ -1,6 +1,5 @@
 import os
 import shutil
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -31,6 +30,7 @@ for u in dict_columns:
     print(u)
     columns = dict_columns[u]
     time_labels = [int(i.split("_")[1]) for i in columns]
+    time_labels_np = np.array(time_labels).reshape(-1, 1)
     time_check = max(time_labels)
     limits = file_limits[file_limits["name"] == u]
     bottom_limit = float(limits["bottom_limit"])
@@ -86,21 +86,13 @@ for u in dict_columns:
     plt.savefig(f"normal_distribution/result/{u}/4.jpg")
     plt.close()
 
-    mean = []
-    std = []
-    for i in columns:
-        data = np.array(train[i])
-        mean.append(data.mean())
-        std.append(data.std())
+    mean = np.array([np.array(train[i]).mean() for i in columns])
+    std = np.array([np.array(train[i]).std() for i in columns])
 
     f.write("Мат. ожидания:\n")
     f.write(str(mean))
     f.write("\nСреднеквадратические отклонения:\n")
     f.write(str(std))
-
-    mean = np.array(mean)
-    std = np.array(std)
-    time_labels_np = np.array(time_labels).reshape(-1, 1)
 
     model_mean = LinearRegression()
     model_mean.fit(time_labels_np, mean)

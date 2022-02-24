@@ -33,22 +33,15 @@ for u in dict_columns:
         print(u, dist)
         columns = dict_columns[u]
         time_labels = [int(i.split("_")[1]) for i in columns]
+        time_labels_np = np.array(time_labels).reshape(-1, 1)
         time_check = max(time_labels)
         limits = file_limits[file_limits["name"] == u]
         bottom_limit = float(limits["bottom_limit"])
         top_limit = float(limits["top_limit"])
         f = open(f"normal_distribution/result2/{u}.txt", "a", encoding="utf-8")
 
-        mean = []
-        std = []
-        for i in columns:
-            data = np.array(train[i])
-            mean.append(data.mean())
-            std.append(data.std())
-
-        mean = np.array(mean)
-        std = np.array(std)
-        time_labels_np = np.array(time_labels).reshape(-1, 1)
+        mean = np.array([np.array(train[i]).mean() for i in columns])
+        std = np.array([np.array(train[i]).std() for i in columns])
 
         model_mean = LinearRegression()
         model_mean.fit(time_labels_np, mean)
@@ -88,9 +81,9 @@ for u in dict_columns:
 
         # test_error = abs((test_working_predict[6] - test_working_experiment[6]) / test_working_experiment[6])
 
-        f.write(f"\n\nОбучающая выборка - {100 - int(dist * 100)}%, тестовая выборка - {int(dist * 100)}%\n")
+        f.write(f"Обучающая выборка - {100 - int(dist * 100)}%, тестовая выборка - {int(dist * 100)}%\n")
         for t, p, e in zip(time_labels, test_working_predict, test_working_experiment):
             f.write(f" {t}: {p} ({e})\n")
-        f.write(f" Ошибка: {test_error}")
+        f.write(f" Ошибка: {test_error}\n\n")
 
         f.close()
