@@ -45,6 +45,7 @@ for u in dict_columns:
     f = open(f"{PATH}/results.txt", "w", encoding="utf-8")
 
     weibull = sps.weibull_max if limits["weibull_function"].iloc[0] == "max" else sps.weibull_min
+
     linear_regression_x = []
     loc = []
     scale = []
