@@ -143,7 +143,7 @@ for u in dict_columns:
         plt.plot(x, sps.norm(loc=k, scale=l).pdf(x), color='darkorange')
         plt.axvline(bottom_limit, 0, 1, color='k')
         plt.axvline(top_limit, 0, 1, color='k')
-        plt.savefig(f"{PATH}/7/{n}.jpg")
+        plt.savefig(f"{PATH}/7/{i}.jpg")
         plt.close()
 
     test_working_predict = []
