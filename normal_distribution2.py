@@ -58,10 +58,6 @@ for u in dict_columns:
         model_std = LinearRegression()
         model_std.fit(linear_regression_x, std)
 
-        train_mean0 = np.array(train[columns[0]]).mean()
-        train_std0 = np.array(train[columns[0]]).std()
-        linear_regression_x_train = np.array([[i, train_mean0, train_std0] for i in time_labels])
-
         test_mean0 = np.array(test[columns[0]]).mean()
         test_std0 = np.array(test[columns[0]]).std()
         linear_regression_x_test = np.array([[i, test_mean0, test_std0] for i in time_labels])
