@@ -17,7 +17,7 @@ def split3(l):
 
 
 def weibull(train, test, columns, param, file_limits, weibull_shape, weibull_function=None, plot_path=None):
-    print(param, weibull_shape)
+    print(f"{param} shape={weibull_shape} func={weibull_function}")
     time_labels = [int(i.split("_")[1]) for i in columns]
     train_split3 = split3(train)
     limits = file_limits[file_limits["name"] == param]
@@ -160,8 +160,11 @@ def main():
         if os.path.isdir(path):
             shutil.rmtree(path)
         os.makedirs(path)
+        linspace = np.linspace(0.1, 0.9, 17)
         for param in dict_columns:
-            for dist in np.linspace(0.1, 0.5, 5):
+            x = []
+            errors = []
+            for dist in linspace:
                 train, test = train_test_split(file, test_size=dist, random_state=42)
                 weibull_shape = float(file_limits[file_limits["name"] == param]["weibull_shape"])
                 time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits,
@@ -173,6 +176,16 @@ def main():
                     f.write(f"{str(t).ljust(8)}{str(p).ljust(21)}{e}\n")
                 f.write(f"Ошибка: {error}\n\n")
                 f.close()
+                x.append(f"{len(train)}/{len(test)}\n{round((1 - dist) * 100)}%/{round(dist * 100)}%")
+                errors.append(error)
+            regression = LinearRegression()
+            regression.fit(linspace.reshape(-1, 1), errors)
+            plt.figure(figsize=(11, 7))
+            plt.rc('xtick', labelsize=6)
+            plt.bar(x, errors)
+            plt.plot(x, regression.predict(linspace.reshape(-1, 1)), color="r")
+            plt.xlabel('Train/test')
+            plt.savefig(f"{path}/{param}.jpg")
     elif o == "3":
         path = "weibull_distribution/result3"
         if os.path.isdir(path):
@@ -212,46 +225,48 @@ def main():
         train, test = train_test_split(file, test_size=0.2, random_state=42)
         for param in dict_columns:
             shapes = np.linspace(0.1, 15, 20)
-            errors = []
-            for shape in shapes:
-                time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits, shape)
-                errors.append(error)
 
-            def f(shape=None):
+            def weibull_f(func, shape=None):
                 if shape is not None and shape <= 0:
                     return 1
-                return weibull(train, test, dict_columns[param], param, file_limits, shape)[3]
+                return weibull(train, test, dict_columns[param], param, file_limits, shape, func)[3]
 
-            def gradient_descent(curr_shape, prec, rate):
+            def gradient_descent(curr_shape, prec, rate, func):
+                def weibull_f_wrap(shape):
+                    return weibull_f(func, shape)
 
-                descent_hist = {curr_shape: f(curr_shape)}
+                descent_hist = {curr_shape: weibull_f_wrap(curr_shape)}
                 prev_shape = curr_shape + prec + 1
-                while abs(curr_shape - prev_shape) > prec:
-                # while abs(curr_shape - prev_shape) > prec and len(descent_hist) < 50:
+                # while abs(curr_shape - prev_shape) > prec:
+                while abs(curr_shape - prev_shape) > prec and len(descent_hist) < 100:
                     print(abs(curr_shape - prev_shape), len(descent_hist))
                     prev_shape = curr_shape
-                    deriv = derivative(f, prev_shape, dx=0.01)
+                    deriv = derivative(weibull_f_wrap, prev_shape, dx=0.01)
                     curr_shape = prev_shape - rate * deriv
-                    descent_hist[curr_shape] = f(curr_shape)
-                return curr_shape, descent_hist
+                    descent_hist[curr_shape] = weibull_f_wrap(curr_shape)
+                return descent_hist
 
-            descent_hist = gradient_descent(2, 0.01, 1)[1]
-            # descent_hist = gradient_descent(2, 0.01, 1)[1] | gradient_descent(4, 0.01, 1)[1] | gradient_descent(6, 0.01, 1)[1]
-            for i, j in descent_hist.items():
-                print(i, j)
-            weibull_shape = min(descent_hist, key=descent_hist.get)
-            print("Ошибка прогнозом", f(weibull_shape))
-            print("Ошибка ручками", f())
-            plt.title(f'График ошибок {param}')
-            plt.xlabel('shape')
-            plt.ylabel('error')
-            plt.plot(shapes, errors)
-            plt.plot(list(descent_hist.keys()), list(descent_hist.values()), 'ro')
-            plt.axvline(weibull_shape)
-            plt.xlim([0, 15])
-            plt.ylim([0, 1])
-            plt.savefig(f"{path}/{param}.jpg")
-            plt.close()
+            f = open(f"{path}/{param}.txt", "a", encoding="utf-8")
+            for func in ["min", "max"]:
+                errors = []
+                for shape in shapes:
+                    time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits,
+                                                               shape, func)
+                    errors.append(error)
+                descent_hist = gradient_descent(2, 0.01, 1, func)
+                weibull_shape = min(descent_hist, key=descent_hist.get)
+                plt.title(f'График ошибок {param} ({func})')
+                plt.xlabel('shape')
+                plt.ylabel('error')
+                plt.plot(shapes, errors)
+                plt.plot(list(descent_hist.keys()), list(descent_hist.values()), 'ro')
+                plt.axvline(weibull_shape)
+                plt.xlim([0, 15])
+                plt.ylim([0, 1])
+                plt.savefig(f"{path}/{param}_{func}.jpg")
+                plt.close()
+                f.write(f"{func}:\n shape: {weibull_shape}\n error: {weibull_f(func, weibull_shape)}\n")
+            f.close()
 
 
 if __name__ == "__main__":

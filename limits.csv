@@ -1,9 +1,9 @@
 name,bottom_limit,top_limit,weibull_shape,weibull_function
-Ikz2,1.811,1.831,2.9,max
-Uobr,0.69,0.705,0.8,max
-Uzp,2.25,3,2.2,min
-Iutz1,14,21,5.6,max
-Iutz2,13,24,4.4,min
-Usi,3.8,4,15.6,max
-Rsi,500,520,1.3,max
-Is,6,6.4,4.6,max
+Ikz2,1.811,1.831,2,max
+Uobr,0.69,0.705,0.8987613534498962,max
+Uzp,2.25,3,1.6810112207851642,max
+Iutz1,14,21,4.517491305096838,min
+Iutz2,13,24,2.949220619075892,min
+Usi,3.8,4,8.766210778839948,max
+Rsi,500,520,1.4652616224748738,max
+Is,6,6.4,4.883857709161098,max
