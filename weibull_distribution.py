@@ -17,7 +17,7 @@ def split3(l):
 
 
 def weibull(train, test, columns, param, file_limits, weibull_shape, weibull_function=None, plot_path=None):
-    print(f"{param} shape={weibull_shape} func={weibull_function}")
+    # print(f"{param} shape={weibull_shape} func={weibull_function}")
     time_labels = [int(i.split("_")[1]) for i in columns]
     train_split3 = split3(train)
     limits = file_limits[file_limits["name"] == param]
@@ -137,7 +137,9 @@ def main():
     print("1 - 80/20 с графиками\n"
           "2 - Разные варианты тренировочной и контрольной выборок\n"
           "3 - График ошибок при разных значениях shape\n"
-          "4 - Поиск оптимального shape с помощью градиентного спуска")
+          "4 - Поиск оптимального shape с помощью градиентного спуска\n"
+          "5 - Разные варианты тренировочной и контрольной выборок + разный random state (минимальная из ошибок)\n"
+          "6 - Разные варианты тренировочной и контрольной выборок + разный random state (средняя ошибка)")
     o = input()
     if o == "1":
         path = "weibull_distribution/result1"
@@ -160,7 +162,8 @@ def main():
         if os.path.isdir(path):
             shutil.rmtree(path)
         os.makedirs(path)
-        linspace = np.linspace(0.1, 0.9, 17)
+        # linspace = np.linspace(0.1, 0.9, 17)
+        linspace = np.linspace(0.1, 0.9, 9)
         for param in dict_columns:
             x = []
             errors = []
@@ -191,7 +194,7 @@ def main():
         if os.path.isdir(path):
             shutil.rmtree(path)
         os.makedirs(f"{path}")
-        train, test = train_test_split(file, test_size=0.2, random_state=42)
+        train, test = train_test_split(file, test_size=0.5, random_state=42)
         shapes = np.linspace(0.1, 10, 100)
         for param in dict_columns:
             weibull_shape_base = float(file_limits[file_limits["name"] == param]["weibull_shape"])
@@ -205,6 +208,12 @@ def main():
                 time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits,
                                                            weibull_shape, "max")
                 errors2.append(error)
+            model = LinearRegression()
+            model.fit(np.array(errors1).reshape(-1, 1), shapes)
+            print("!!!!!", param, "min", model.predict([[0]]))
+            model = LinearRegression()
+            model.fit(np.array(errors2).reshape(-1, 1), shapes)
+            print("!!!!!", param, "max", model.predict([[0]]))
             plt.title(f'График ошибок {param} min')
             plt.xlabel('shape')
             plt.ylabel('error')
@@ -267,6 +276,79 @@ def main():
                 plt.close()
                 f.write(f"{func}:\n shape: {weibull_shape}\n error: {weibull_f(func, weibull_shape)}\n")
             f.close()
+    elif o == "5":
+        path = "weibull_distribution/result5"
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        os.makedirs(path)
+        # linspace = np.linspace(0.1, 0.9, 17)
+        linspace = np.linspace(0.1, 0.9, 9)
+        for param in dict_columns:
+            x = []
+            errors = []
+            for dist in linspace:
+                curr_err = 1
+                for rand_state in range(42, 55):
+                    train, test = train_test_split(file, test_size=dist, random_state=rand_state)
+                    weibull_shape = float(file_limits[file_limits["name"] == param]["weibull_shape"])
+                    time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits,
+                                                               weibull_shape)
+                    f = open(f"{path}/{param}.txt", "a", encoding="utf-8")
+                    f.write(f"Обучающая выборка - {100 - int(dist * 100)}%, тестовая выборка - {int(dist * 100)}%, random state - {rand_state}\n")
+                    f.write(f"Процент рабочих устройств:\n{'Время'.ljust(8)}{'Прогноз'.ljust(21)}Реальное значение\n")
+                    for t, p, e in zip(time, predict, experiment):
+                        f.write(f"{str(t).ljust(8)}{str(p).ljust(21)}{e}\n")
+                    f.write(f"Ошибка: {error}\n\n")
+                    f.close()
+                    curr_err = min(curr_err, error)
+                x.append(f"{len(train)}/{len(test)}\n{round((1 - dist) * 100)}%/{round(dist * 100)}%")
+                errors.append(curr_err)
+            regression = LinearRegression()
+    elif o == "6":
+        path = "weibull_distribution/result6"
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        os.makedirs(path)
+        # linspace = np.linspace(0.1, 0.9, 17)
+        linspace = np.linspace(0.1, 0.9, 9)
+        for param in dict_columns:
+            x = []
+            errors = []
+            for dist in linspace:
+                err_sum = 0
+                n = 0
+                for rand_state in range(42, 55):
+                    train, test = train_test_split(file, test_size=dist, random_state=rand_state)
+                    weibull_shape = float(file_limits[file_limits["name"] == param]["weibull_shape"])
+                    time, predict, experiment, error = weibull(train, test, dict_columns[param], param, file_limits,
+                                                               weibull_shape)
+                    f = open(f"{path}/{param}.txt", "a", encoding="utf-8")
+                    f.write(f"Обучающая выборка - {100 - int(dist * 100)}%, тестовая выборка - {int(dist * 100)}%, random state - {rand_state}\n")
+                    f.write(f"Процент рабочих устройств:\n{'Время'.ljust(8)}{'Прогноз'.ljust(21)}Реальное значение\n")
+                    for t, p, e in zip(time, predict, experiment):
+                        f.write(f"{str(t).ljust(8)}{str(p).ljust(21)}{e}\n")
+                    f.write(f"Ошибка: {error}\n\n")
+                    f.close()
+                    err_sum += error
+                    n += 1
+                x.append(f"{len(train)}/{len(test)}\n{round((1 - dist) * 100)}%/{round(dist * 100)}%")
+                curr_err = err_sum / n
+                errors.append(curr_err)
+            regression = LinearRegression()
+            regression.fit(linspace.reshape(-1, 1), errors)
+            plt.figure(figsize=(11, 7))
+            plt.rc('xtick', labelsize=6)
+            plt.bar(x, errors)
+            plt.plot(x, regression.predict(linspace.reshape(-1, 1)), color="r")
+            plt.xlabel('Train/test')
+            plt.savefig(f"{path}/{param}.jpg")
+            regression.fit(linspace.reshape(-1, 1), errors)
+            plt.figure(figsize=(11, 7))
+            plt.rc('xtick', labelsize=6)
+            plt.bar(x, errors)
+            plt.plot(x, regression.predict(linspace.reshape(-1, 1)), color="r")
+            plt.xlabel('Train/test')
+            plt.savefig(f"{path}/{param}.jpg")
 
 
 if __name__ == "__main__":
